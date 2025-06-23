@@ -1,0 +1,59 @@
+version: '3.8'
+name: __REPLACE__PROJECT_NAME
+services:
+  __REPLACE__APP_NAME:
+    container_name: __REPLACE__APP_NAME
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    depends_on:
+      - __REPLACE__LOCAL_DB_HOST
+    expose:
+      - '__REPLACE__APP_PORT'
+    ports:
+      - '127.0.0.1:__REPLACE__APP_PORT:__REPLACE__APP_PORT'
+    networks:
+      - __REPLACE__NETWORK
+    environment:
+      - PORT=__REPLACE__APP_PORT
+      - POSTGRES_URL=postgresql://__REPLACE__LOCAL_DB_USER:__REPLACE__LOCAL_DB_PW@__REPLACE__LOCAL_DB_HOST:5432/__REPLACE__LOCAL_DB_NAME
+    volumes:
+      # VS Code Dev Container는 전체 프로젝트를 workspace로 마운트
+      - ..:/workspace:cached
+      # node_modules와 .next는 named volume 사용 (권한 문제 해결)
+      - node_modules_volume:/workspace/node_modules
+      - next_volume:/workspace/.next
+      # pnpm 캐시
+      - pnpm_cache:/home/node/.pnpm-store
+    # VS Code가 컨테이너를 제어하므로 sleep infinity로 유지
+    command: sleep infinity
+
+  __REPLACE__LOCAL_DB_HOST:
+    container_name: __REPLACE__LOCAL_DB_HOST
+    image: postgres:17.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: __REPLACE__LOCAL_DB_USER
+      POSTGRES_PASSWORD: __REPLACE__LOCAL_DB_PW
+      POSTGRES_DB: __REPLACE__LOCAL_DB_NAME
+    expose:
+      - '__REPLACE__LOCAL_DB_PORT'
+    ports:
+      - '__REPLACE__LOCAL_DB_PORT:5432'
+    networks:
+      - __REPLACE__NETWORK
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  __REPLACE__NETWORK:
+    driver: bridge
+
+volumes:
+  pnpm_cache:
+  node_modules_volume:
+    driver: local
+  next_volume:
+    driver: local
+  postgres_data:
+    driver: local

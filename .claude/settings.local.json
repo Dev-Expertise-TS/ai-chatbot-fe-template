@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)",
+      "Bash(bash:*)",
+      "Bash(rm:*)",
+      "Bash(/bin/bash:*)",
+      "Bash(./.devcontainer/init_dev_env.sh:*)",
+      "Bash(touch:*)"
+    ],
+    "deny": []
+  }
+}

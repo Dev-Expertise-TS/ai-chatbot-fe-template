@@ -1,0 +1,49 @@
+{
+  "name": "__REPLACE__PROJECT_NAME",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "__REPLACE__APP_NAME",
+  "workspaceFolder": "/workspace",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": false,
+      "username": "node",
+      "userUid": "1000",
+      "userGid": "1000",
+      "upgradePackages": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "formulahendry.auto-rename-tag",
+        "bradlc.vscode-tailwindcss",
+        "dsznajder.es7-react-js-snippets",
+        "biomejs.biome",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "quickfix.biome": "explicit",
+          "source.organizeImports.biome": "explicit"
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [__REPLACE__APP_PORT, __REPLACE__LOCAL_DB_PORT],
+
+  "postCreateCommand": ".devcontainer/setup_container.sh",
+
+  "remoteUser": "node"
+}

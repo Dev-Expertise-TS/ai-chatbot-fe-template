@@ -1,0 +1,433 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply overflow-x-hidden max-w-full;
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* 텍스트 렌더링 부드럽게 만들기 */
+  body, .message-content, [data-testid="message-content"] {
+    /* 1. 글꼴 렌더링 최적화 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* 2. 미세한 텍스트 그림자 - 라이트 모드 */
+    text-shadow: 0 0 0.5px rgba(0, 0, 0, 0.1);
+    
+    /* 6. 서브픽셀 렌더링 */
+    -webkit-text-stroke: 0.45px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 다크 모드에서의 텍스트 그림자와 서브픽셀 렌더링 */
+  .dark body, .dark .message-content, .dark [data-testid="message-content"] {
+    text-shadow: 0 0 0.5px rgba(255, 255, 255, 0.1);
+    -webkit-text-stroke: 0.45px rgba(255, 255, 255, 0.1);
+  }
+}
+
+.skeleton {
+  * {
+    pointer-events: none !important;
+  }
+
+  *[class^='text-'] {
+    color: transparent;
+    @apply rounded-md bg-foreground/20 select-none animate-pulse;
+  }
+
+  .skeleton-bg {
+    @apply bg-foreground/10;
+  }
+
+  .skeleton-div {
+    @apply bg-foreground/20 animate-pulse;
+  }
+}
+
+.ProseMirror {
+  outline: none;
+}
+
+.cm-editor,
+.cm-gutters {
+  @apply bg-background dark:bg-zinc-800 outline-none selection:bg-zinc-900 !important;
+}
+
+.ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.ͼo.cm-selectionBackground,
+.ͼo.cm-content::selection {
+  @apply bg-zinc-200 dark:bg-zinc-900 !important;
+}
+
+.cm-activeLine,
+.cm-activeLineGutter {
+  @apply bg-transparent !important;
+}
+
+.cm-activeLine {
+  @apply rounded-r-sm !important;
+}
+
+.cm-lineNumbers {
+  @apply min-w-7;
+}
+
+.cm-foldGutter {
+  @apply min-w-3;
+}
+
+.cm-lineNumbers .cm-activeLineGutter {
+  @apply rounded-l-sm !important;
+}
+
+.suggestion-highlight {
+  @apply bg-blue-200 hover:bg-blue-300 dark:hover:bg-blue-400/50 dark:text-blue-50 dark:bg-blue-500/40;
+}
+
+/* Table responsive styles */
+.markdown-table-container {
+  @apply w-full;
+  max-width: 100%;
+}
+
+/* Markdown image styles */
+.markdown-image {
+  @apply max-w-full aspect-auto w-full mx-auto max-h-[480px];
+  object-fit: cover;
+}
+
+/* Images inside tables should be smaller and responsive */
+.markdown-table .markdown-image {
+  @apply w-48 h-44;
+}
+
+/* Images in table cells should have proper padding */
+.markdown-table td:has(.markdown-image) {
+  @apply p-2;
+  width: fit-content !important;
+  max-width: 256px !important;
+}
+
+/* Table column width constraints */
+.markdown-table th,
+.markdown-table td {
+  width: fit-content !important;
+  max-width: 256px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Force left alignment in table headers */
+.markdown-table th {
+  text-align: left !important;
+}
+
+/* Ensure tables in messages can scroll horizontally */
+[data-testid='message-content'] table {
+  text-wrap: wrap;
+}
+
+/* Prevent code blocks from overflowing viewport */
+pre {
+  max-width: calc(100vw - 3rem);
+  overflow-x: auto;
+}
+
+/* Prevent inline code from breaking layout */
+code {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Drag scroll styles for tables */
+.markdown-table-container .indiana-scroll-container {
+  @apply select-none;
+}
+
+.markdown-table-container .indiana-scroll-container--dragging {
+  @apply cursor-grabbing;
+}
+
+/* Allow text selection when not dragging */
+.markdown-table-container:not(.indiana-scroll-container--dragging) table {
+  @apply select-text;
+}
+
+/* Scroll indicators with gradient shadows */
+.scroll-shadow-left::before,
+.scroll-shadow-right::after {
+  @apply absolute top-0 bottom-0 w-8 pointer-events-none z-10;
+  content: '';
+}
+
+.scroll-shadow-left::before {
+  @apply left-0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.dark .scroll-shadow-left::before {
+  background: linear-gradient(to right, rgba(9, 9, 11, 1) 0%, rgba(9, 9, 11, 0) 100%);
+}
+
+.scroll-shadow-right::after {
+  @apply right-0;
+  background: linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.dark .scroll-shadow-right::after {
+  background: linear-gradient(to left, rgba(9, 9, 11, 1) 0%, rgba(9, 9, 11, 0) 100%);
+}
+
+/* Add shadow inset effect for better visibility */
+.scroll-shadow-left {
+  box-shadow: inset 16px 0 16px -16px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-shadow-right {
+  box-shadow: inset -16px 0 16px -16px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-shadow-left.scroll-shadow-right {
+  box-shadow: inset 16px 0 16px -16px rgba(0, 0, 0, 0.1),
+    inset -16px 0 16px -16px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading animation for ThinkingMessage */
+@keyframes gradientShift {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.loading-gradient {
+  background: linear-gradient(
+    90deg,
+    rgb(209, 213, 219) 0%,
+    rgb(156, 163, 175) 20%,
+    rgb(55, 65, 81) 40%,
+    rgb(31, 41, 55) 50%,
+    rgb(55, 65, 81) 60%,
+    rgb(156, 163, 175) 80%,
+    rgb(209, 213, 219) 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 3s linear infinite;
+}
+.loding-profile-gradient {
+  background: radial-gradient(
+      100% 100% at var(--g4-1-x-position) var(--g4-1-y-position),
+      #d710d6 -100%,
+      transparent
+    ),
+    radial-gradient(
+      100% 100% at var(--g4-2-x-position) var(--g4-2-y-position),
+      #a494d9 -100%,
+      transparent
+    ),
+    radial-gradient(
+      100% 100% at var(--g4-3-x-position) var(--g4-3-y-position),
+      #317ce6 -100%,
+      transparent
+    ),
+    radial-gradient(
+      100% 100% at var(--g4-4-x-position) var(--g4-4-y-position),
+      #5b40dc -100%,
+      transparent
+    ),
+    #ffffff;
+  animation-name: g-4;
+  animation-iteration-count: infinite;
+  animation-duration: 4s;
+  transition-timing-function: ease-in-out;
+}
+@property --g4-1-x-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 87.23379629629622%;
+}
+@property --g4-1-y-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 83.08008213552361%;
+}
+@property --g4-2-x-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 18.900462962962923%;
+}
+@property --g4-2-y-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 78.15195071868584%;
+}
+@property --g4-3-x-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 88.62268518518512%;
+}
+@property --g4-3-y-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 15.071868583162217%;
+}
+@property --g4-4-x-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 11.712962962962967%;
+}
+@property --g4-4-y-position {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 16.550308008213555%;
+}
+:root {
+  --g4-1-x-position: 87.23379629629622%;
+  --g4-1-y-position: 83.08008213552361%;
+  --g4-2-x-position: 18.900462962962923%;
+  --g4-2-y-position: 78.15195071868584%;
+  --g4-3-x-position: 88.62268518518512%;
+  --g4-3-y-position: 15.071868583162217%;
+  --g4-4-x-position: 11.712962962962967%;
+  --g4-4-y-position: 16.550308008213555%;
+}
+@keyframes g-4 {
+  25% {
+    --g4-1-x-position: 88.11342592592592%;
+    --g4-1-y-position: 17.74127310061603%;
+    --g4-2-x-position: 86.99074074074056%;
+    --g4-2-y-position: 80.29774127310063%;
+    --g4-3-x-position: 11.157407407407389%;
+    --g4-3-y-position: 18.80903490759754%;
+    --g4-4-x-position: 15.543981481481403%;
+    --g4-4-y-position: 78.31622176591377%;
+  }
+  50% {
+    --g4-1-x-position: 13.888888888888834%;
+    --g4-1-y-position: 18.891170431211524%;
+    --g4-2-x-position: 85.20833333333329%;
+    --g4-2-y-position: 17.874743326488705%;
+    --g4-3-x-position: 15%;
+    --g4-3-y-position: 85%;
+    --g4-4-x-position: 100%;
+    --g4-4-y-position: 100%;
+  }
+  75% {
+    --g4-1-x-position: 17.071759259259224%;
+    --g4-1-y-position: 75.56468172484597%;
+    --g4-2-x-position: 13.136574074074%;
+    --g4-2-y-position: 20.739219712525706%;
+    --g4-3-x-position: 84.25925925925932%;
+    --g4-3-y-position: 74.94866529774129%;
+    --g4-4-x-position: 81.82870370370377%;
+    --g4-4-y-position: 16.837782340862468%;
+  }
+}

@@ -1,0 +1,78 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+.pnpm-store/
+
+# testing
+coverage
+
+# next.js
+.next/
+out/
+build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# turbo
+.turbo
+
+.env
+.env.*
+.env*.local
+!.env.example
+.vercel
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/*
+
+/credentials/**/*
+!/credentials/.gitkeep
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+*.tfplan
+.terraform.lock.hcl
+terraform/environments/*/secrets.auto.tfvars
+
+# Cloud SQL Proxy
+cloud-sql-proxy
+
+# Production secrets
+.env.production
+!.env.production.example
+
+terraform/.terraform/**/*
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+terraform/*.tfvars.json
+
+# Secrets directory
+secrets/
+
+
+.placeholder_backup_*
