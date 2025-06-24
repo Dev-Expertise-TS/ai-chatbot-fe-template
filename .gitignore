@@ -74,5 +74,4 @@ terraform/*.tfvars.json
 # Secrets directory
 secrets/
 
-
-.placeholder_backup_*
+./.devcontainer/tmp/**/*

@@ -10,7 +10,8 @@
       "Bash(rm:*)",
       "Bash(/bin/bash:*)",
       "Bash(./.devcontainer/init_dev_env.sh:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

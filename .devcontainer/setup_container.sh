@@ -1,14 +1,30 @@
 #!/bin/bash
 set -e
 
+# 스크립트 경로 확인
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# 공통 디버그 함수 로드
+source "$SCRIPT_DIR/debug_common.sh"
+
+# 디버그 초기화 (--debug 플래그 확인 및 로그 설정)
+init_debug "setup_container" "$@"
+
+# 시작 시간 기록
+START_TIME=$(start_timer)
+
 echo "====================================="
 echo "Dev Container Setup Script"
 echo "====================================="
+
+log_debug "Dev Container 설정 시작"
 
 # 1. Install Google Cloud SDK
 echo ""
 echo "Step 1: Installing Google Cloud SDK..."
 echo "-------------------------------------"
+GCLOUD_START=$(start_timer)
+log_debug "Google Cloud SDK 설치 시작"
 
 # Add Google Cloud SDK distribution URI as a package source
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
@@ -97,3 +113,6 @@ echo ""
 echo "====================================="
 echo "Dev Container setup completed!"
 echo "====================================="
+
+# 디버그 종료
+finish_debug "setup_container" "$START_TIME"

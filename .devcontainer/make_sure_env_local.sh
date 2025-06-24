@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
 
+# 스크립트 경로
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+
+# 공통 디버그 함수 로드
+source "$SCRIPT_DIR/debug_common.sh"
+
+# 디버그 초기화 (--debug 플래그 확인 및 로그 설정)
+init_debug "make_sure_env_local" "$@"
+
+# 시작 시간 기록
+START_TIME=$(start_timer)
+
 # 색상 정의
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
-
-# 스크립트 경로
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 ENV_EXAMPLE="$PROJECT_ROOT/.env.example"
 ENV_LOCAL="$PROJECT_ROOT/.env.local"
 ENV_DEFAULT="$PROJECT_ROOT/.env.init_default"
@@ -17,13 +26,20 @@ ENV_DEFAULT="$PROJECT_ROOT/.env.init_default"
 # 필수 환경 변수 목록
 REQUIRED_VARS=("AUTH_SECRET" "POSTGRES_URL")
 
-# .env.local 파일이 없으면 .env.example을 복사
-if [ ! -f "$ENV_LOCAL" ]; then
-    echo -e "${BLUE}📋 .env.local 파일이 없습니다. .env.example을 복사합니다...${NC}"
-    cp "$ENV_EXAMPLE" "$ENV_LOCAL"
-    echo -e "${GREEN}✅ .env.local 파일이 생성되었습니다.${NC}"
-    echo ""
+# 기존 .env.local 파일이 있으면 삭제
+if [ -f "$ENV_LOCAL" ]; then
+    echo -e "${YELLOW}⚠️  기존 .env.local 파일을 삭제합니다...${NC}"
+    log_debug "기존 .env.local 파일 삭제"
+    rm -f "$ENV_LOCAL"
 fi
+
+# .env.example을 복사하여 새로운 .env.local 생성
+echo -e "${BLUE}📋 .env.example을 복사하여 새로운 .env.local 파일을 생성합니다...${NC}"
+log_debug ".env.example을 .env.local로 복사 중"
+cp "$ENV_EXAMPLE" "$ENV_LOCAL"
+echo -e "${GREEN}✅ .env.local 파일이 생성되었습니다.${NC}"
+echo ""
+log_debug ".env.local 파일 생성 완료"
 
 # 환경 변수 읽기 함수
 read_env_var() {
@@ -301,3 +317,6 @@ echo -e "${BLUE}설정된 환경 변수는 ${ENV_LOCAL} 파일에서 확인할 �
 
 # 임시 파일 정리
 rm -f "$DESC_FILE"
+
+# 디버그 종료
+finish_debug "make_sure_env_local" "$START_TIME"
