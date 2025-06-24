@@ -95,7 +95,7 @@ OPENAI_API_KEY=sk-your-dev-api-key
 
 1. VS Code에서 프로젝트 폴더 열기
 2. `Ctrl+Shift+P` (또는 `Cmd+Shift+P`)로 명령 팔레트 열기
-3. "Dev Containers: Reopen in Container" 선택
+3. "Dev Containers: Reopen in Container" 선택 또는 "Dev Containers: Rebuild Without Cache and Reopen in Container" 선택
 4. 컨테이너가 빌드되고 시작될 때까지 대기
 
 ### 개발 서버 실행
