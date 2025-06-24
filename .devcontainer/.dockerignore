@@ -1,2 +1,2 @@
 .placeholder_backtup_*
-./tmp/**/*
+tmp/
