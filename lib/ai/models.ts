@@ -105,8 +105,8 @@ export const ANTHROPIC_MODELS: ChatModel[] = [
 export const CXDM_MODELS: ChatModel[] = [
   {
     id: '__REPLACE__CUSTOM_AI_MODEL',
-    name: '__REPLACE__CUSTOM_AI_MODEL'.split('-').map(([ch1, ...restCh]) => `${ch1.toUpperCase()}${restCh.join('')}`).join(' '),
-    description: 'Luxury hotel AI concierge by Tourvis Select',
+    name: '__REPLACE__CUSTOM_AI_MODEL'.replaceAll('_', '-').split('-').map(([ch1, ...restCh]) => `${ch1.toUpperCase()}${restCh.join('')}`).join(' '),
+    description: 'CX DM AI Agent',
     provider: 'cxdm',
     type: 'chat',
   },
