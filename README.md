@@ -27,6 +27,14 @@ Dev Container를 시작하기 전에 이 값들을 실제 값으로 치환해야
 ./.devcontainer/init_dev_env.sh
 ```
 
+디버그 로그를 남기려면 다음 명령어로 실행
+
+```bash
+# 프로젝트 루트에서 실행
+./.devcontainer/init_dev_env.sh --debug
+# 로그 파일 위치: ./.devcontainer/tmp/script_name_YYYYMMDD_HHMMSS.log
+```
+
 이 스크립트는 다음 작업을 순서대로 수행 합니다:
 
 1. `.env.example`을 복사하여 새로운 `.env.local` 새로 생성(덮어쓰기) 및 대화식 설정.
