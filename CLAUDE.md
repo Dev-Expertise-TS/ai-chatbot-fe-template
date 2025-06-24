@@ -7,15 +7,20 @@
 
 AI Chatbot Frontend Application을 빠르게 구축하기 위한 템플릿 레포지토리
 
-- VS Code Dev Container 사용
-- Vercel의 Chatbot SDK 사용
+- VS Code의 Dev Container로 개발
+- Vercel Chatbot SDK
   - [@vercel/ai-chatbot](https://github.com/vercel/ai-chatbot.git)의 코드 베이스를 클론 하여 시작함.
+- pnpm 패키지 매니저
+- PostgreSQL DB
+- Redis (Optional)
+- Vercel Blob (Optional)
 
 ## 진행 사항 (2025-06-23)
 
 ### 완료된 작업 ✅
 
 - [x] **초기화 스크립트 체계 구축**
+
   - [x] `init_dev_env.sh` 도입점 스크립트 생성
   - [x] `make_sure_env_local.sh` 환경 변수 설정 스크립트 생성
     - [x] `.env.local` 파일 존재 여부 확인 로직
@@ -28,20 +33,24 @@ AI Chatbot Frontend Application을 빠르게 구축하기 위한 템플릿 레�
     - [x] 중복 라인 제거 (마지막 단계에서 수행)
 
 - [x] **스크립트 파일 구조 정리**
+
   - [x] 모든 스크립트를 `.devcontainer` 디렉토리로 이동
   - [x] 스크립트 내 경로를 `.devcontainer` 기준으로 수정
   - [x] 모든 쉘 스크립트에 실행 권한(chmod +x) 부여
 
 - [x] **Dev Container 설정 수정**
+
   - [x] `devcontainer.json`에서 `initializeCommand` 제거
   - [x] 수동 초기화 프로세스로 변경
 
 - [x] **문서화**
+
   - [x] README.md에 Dev Container 실행 전 필수 초기화 과정 상세 안내
   - [x] 환경 변수 설정 가이드
   - [x] 플레이스홀더 치환 과정 설명
 
 - [x] **한글화 및 UX 개선**
+
   - [x] `.env.example` 파일의 모든 영어 주석을 한글로 번역
   - [x] 환경 변수 입력 시 각 변수에 대한 설명 자동 표시
     - [x] `.env.example`의 주석을 파싱하여 안내 문구로 활용

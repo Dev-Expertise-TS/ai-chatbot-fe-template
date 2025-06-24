@@ -103,7 +103,7 @@ OPENAI_API_KEY=sk-your-dev-api-key
 Dev Container 내에서:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 브라우저에서 `http://localhost:[설정한 포트]`로 접속하여 확인할 수 있습니다.
