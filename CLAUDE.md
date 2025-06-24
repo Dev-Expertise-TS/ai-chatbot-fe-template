@@ -54,6 +54,19 @@ AI Chatbot Frontend Application을 빠르게 구축하기 위한 템플릿 레�
   - [x] 환경 변수 입력 시 `.env.init_default`의 값을 녹색으로 표시하여 기본값 안내
   - [x] `.env.local`에 값이 없을 때 `.env.init_default`의 값으로 자동 설정
 
+## 진행 사항 (2025-06-24)
+
+### 완료된 작업 ✅
+
+- [x] **`replace_placeholders.sh` 성능 최적화**
+  - [x] find 명령어 최적화로 3-5분 → 수초로 실행 시간 단축
+    - [x] 잘못된 `-prune` 사용 수정: 제외 디렉토리를 개별적으로 처리
+    - [x] `-exec grep` 대신 `xargs grep` 사용으로 성능 개선
+  - [x] 디버그 로그 기능 추가
+    - [x] 타임스탬프 포함 상세 로그 (`/tmp/replace_placeholders_YYYYMMDD_HHMMSS.log`)
+    - [x] 각 처리 단계별 소요 시간 측정
+    - [x] 대용량 로그 처리를 위해 파일 전용 로깅 구현
+
 ### 주요 특징
 
 1. **안전한 초기화 프로세스**: Dev Container 시작 전 모든 플레이스홀더와 환경 변수를 설정하여 컨테이너 시작 실패 방지
