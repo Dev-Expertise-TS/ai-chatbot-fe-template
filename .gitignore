@@ -75,3 +75,4 @@ terraform/*.tfvars.json
 secrets/
 
 tmp/
+logs/

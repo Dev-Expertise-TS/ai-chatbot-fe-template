@@ -51,7 +51,7 @@ const TableWithScrollIndicator = ({ children, ...props }: any) => {
       <ScrollContainer
         innerRef={scrollRef}
         className={cn(
-          'overflow-x-auto w-full min-w-0 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm cursor-grab active:cursor-grabbing',
+          'overflow-x-auto w-full min-w-0 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm cursor-grab active:cursor-grabbing',
           canScrollLeft && 'scroll-shadow-left',
           canScrollRight && 'scroll-shadow-right',
         )}

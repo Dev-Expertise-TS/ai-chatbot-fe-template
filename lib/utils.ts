@@ -87,5 +87,5 @@ export function getTrailingMessageId({
 }
 
 export function sanitizeText(text: string) {
-  return text.replace('<has_function_call>', '').replace('\\n', '\n');
+  return text.replace('<has_function_call>', '').replaceAll('\\\\', '\\').replace(/(#{1,6})(\S)/g, '$1 $2').replace(/#\s+login\)/g, '#login)');
 }

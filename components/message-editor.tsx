@@ -54,7 +54,7 @@ export function MessageEditor({
       <Textarea
         data-testid="message-editor"
         ref={textareaRef}
-        className="bg-transparent outline-none overflow-hidden resize-none !text-base rounded-lg w-full"
+        className="bg-transparent outline-none overflow-hidden resize-none !text-base rounded-2xl w-full"
         value={draftContent}
         onChange={handleInput}
       />

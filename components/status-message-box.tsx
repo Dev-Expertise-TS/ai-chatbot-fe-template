@@ -1,32 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ChevronDownIcon, LoaderIcon } from './icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 
-interface ToolCallReasoningProps {
-  isLoading: boolean;
-  reasoning: string;
+interface StatusMessageBoxProps {
+  messages: Array<{
+    state: 'call' | 'result';
+    message: string;
+  }>;
 }
 
-export function ToolCallReasoning({
-  isLoading,
-  reasoning,
-}: ToolCallReasoningProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  // tool call 정보 파싱
-  const match = reasoning.match(/🔄 (.+?)에게 요청: (.+)/);
-  const agentName = match?.[1] || 'Agent';
-  const task = match?.[2] || reasoning;
-
+export function StatusMessageBox({ messages }: StatusMessageBoxProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // 마지막 메시지
+  const lastMessage = messages[messages.length - 1];
+  const isLoading = lastMessage?.state === 'call';
+  
+  // 히스토리 메시지들을 메모이제이션
+  const historyMessages = useMemo(() => {
+    return messages.slice(0, -1);
+  }, [messages]);
+  
   // 로딩이 끝나면 자동으로 접기
   useEffect(() => {
-    if (!isLoading) {
-      setIsExpanded(false);
+    if (!isLoading && messages.length > 0) {
+      const timer = setTimeout(() => {
+        setIsExpanded(isLoading);
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-  }, [isLoading]);
+  }, [isLoading, messages.length]);
+
+  if (messages.length === 0) return null;
 
   const variants = {
     collapsed: {
@@ -43,15 +51,16 @@ export function ToolCallReasoning({
     },
   };
 
+
   return (
-    <div className="flex flex-col bg-muted/50 rounded-2xl p-3 my-2 text-sm border gap-2 text-foreground/70">
+    <div className="flex flex-col bg-muted/50 rounded-2xl p-3 text-sm border gap-2 text-foreground/70">
       {isLoading ? (
         <div className="flex flex-row gap-2 items-center">
           <div className="animate-spin">
             <LoaderIcon />
           </div>
           <div className="font-medium font-mono">
-            AI 컨시어지가 답변을 준비하고 있습니다:
+            {lastMessage.message.replace('_', ' ')}
           </div>
         </div>
       ) : (
@@ -59,11 +68,11 @@ export function ToolCallReasoning({
           <div className="flex flex-row items-center justify-center gap-2">
             <CheckCircle className="text-muted-foreground" size={16} />
             <div className="font-medium font-mono">
-              AI 컨시어지가 작업을 마쳤습니다!
+              {lastMessage.message.replace('_', ' ')}
             </div>
           </div>
           <button
-            data-testid="tool-call-reasoning-toggle"
+            data-testid="status-message-toggle"
             type="button"
             className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => {
@@ -81,9 +90,9 @@ export function ToolCallReasoning({
       )}
 
       <AnimatePresence initial={false}>
-        {isExpanded && (
+        {isExpanded && messages.length > 1 && (
           <motion.div
-            data-testid="tool-call-reasoning-content"
+            data-testid="status-message-history"
             key="content"
             initial="collapsed"
             animate="expanded"
@@ -93,7 +102,13 @@ export function ToolCallReasoning({
             style={{ overflow: 'hidden' }}
             className="text-sm text-foreground/60 rounded-2xl border border-dashed bg-background/30 border-black/20 dark:border-white/20"
           >
-            <q className="px-4 py-2 inline-block italic">{task}</q>
+            <div className="px-4 py-2">
+              {historyMessages.map((msg, idx) => (
+                <div key={`history-${idx}`} className="py-1">
+                  {msg.message.replace('_', ' ')}
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

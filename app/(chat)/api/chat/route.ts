@@ -2,7 +2,6 @@ import {
   appendClientMessage,
   appendResponseMessages,
   createDataStream,
-  smoothStream,
   streamText,
 } from 'ai';
 import { auth, type UserType } from '@/app/(auth)/auth';
@@ -223,7 +222,6 @@ export async function POST(request: Request) {
                   'updateDocument',
                   'requestSuggestions',
                 ],
-          // experimental_transform: smoothStream({ chunking: 'word' }), // 빠른 응답을 위해 비활성화
           experimental_generateMessageId: generateUUID,
           tools: {
             getWeather,

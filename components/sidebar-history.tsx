@@ -105,6 +105,8 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     mutate,
   } = useSWRInfinite<ChatHistory>(getChatHistoryPaginationKey, fetcher, {
     fallbackData: [],
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
   });
 
   const router = useRouter();
@@ -128,16 +130,16 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     }
 
     const interval = setInterval(async () => {
-      await mutate(undefined, { revalidate: true });
+      // 현재 데이터를 유지하면서 백그라운드에서만 업데이트
+      await mutate();
 
       // 약간의 지연 후 다시 체크
       setTimeout(() => {
         if (!hasNewChatInData()) {
           clearInterval(interval);
-        } else {
         }
       }, 500);
-    }, 10000); // 10초마다 체크
+    }, 30000); // 30초마다 체크 (10초는 너무 빈번함)
 
     // 100초 후 자동 중지
     const timeout = setTimeout(() => {

@@ -9,8 +9,6 @@ export function useTableContainerWidth() {
     if (viewportWidth === undefined) return undefined;
 
     const calculatedWidth = viewportWidth - (viewportWidth < 640 ? 24 : 74);
-    console.log('calculatedWidth', calculatedWidth);
-    console.log('viewportWidth', viewportWidth);
     return `${calculatedWidth}px`;
   }, [viewportWidth]);
 

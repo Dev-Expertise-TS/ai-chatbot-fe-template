@@ -121,7 +121,7 @@ const Tool = ({
       <TooltipContent
         side="left"
         sideOffset={16}
-        className="bg-foreground text-background rounded-lg p-3 px-4"
+        className="bg-foreground text-background rounded-2xl p-3 px-4"
       >
         {description}
       </TooltipContent>
@@ -227,7 +227,7 @@ const ReadingLevelSelector = ({
           <TooltipContent
             side="left"
             sideOffset={16}
-            className="bg-foreground text-background text-sm rounded-lg p-3 px-4"
+            className="bg-foreground text-background text-sm rounded-2xl p-3 px-4"
           >
             {LEVELS[currentLevel]}
           </TooltipContent>

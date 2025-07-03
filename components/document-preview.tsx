@@ -123,7 +123,7 @@ const LoadingSkeleton = ({ artifactKind }: { artifactKind: ArtifactKind }) => (
         <div className="text-muted-foreground">
           <div className="animate-pulse rounded-md size-4 bg-muted-foreground/20" />
         </div>
-        <div className="animate-pulse rounded-lg h-4 bg-muted-foreground/20 w-24" />
+        <div className="animate-pulse rounded-2xl h-4 bg-muted-foreground/20 w-24" />
       </div>
       <div>
         <FullscreenIcon />
@@ -179,7 +179,7 @@ const PureHitboxLayer = ({
 
   return (
     <div
-      className="size-full absolute top-0 left-0 rounded-lg z-10"
+      className="size-full absolute top-0 left-0 rounded-2xl z-10"
       ref={hitboxRef}
       onClick={handleClick}
       role="presentation"

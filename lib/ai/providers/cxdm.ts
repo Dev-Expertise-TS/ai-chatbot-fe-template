@@ -6,22 +6,35 @@ import {
   type LanguageModelV1StreamPart,
   NoSuchModelError,
 } from '@ai-sdk/provider';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 // CXDM API 엔드포인트
-const CUSTOM_API_ENDPOINT = process.env.CUSTOM_API_ENDPOINT || '';
+const CXDM_API_ENDPOINT = process.env.CXDM_API_ENDPOINT || '';
 
 // 디버깅을 위한 상세 로깅 함수
 const DEBUG_MODE = process.env.CXDM_DEBUG === 'true';
 function logDebug(label: string, data: any) {
   if (DEBUG_MODE) {
-    console.log(`[CXDM Provider] ${label}:`, JSON.stringify(data, null, 2));
+    // 디버깅 모드에서도 과도한 로깅은 제한
+    if (label !== 'SSE Line' && label !== 'Parsed SSE Data') {
+      console.log(`[CXDM Provider] ${label}:`, typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+    }
   }
 }
 
-// 환경변수 확인
-if (DEBUG_MODE) {
-  console.log('[CXDM Provider] API Endpoint:', CUSTOM_API_ENDPOINT);
+// Partner Agent 메시지 인터페이스
+export interface PartnerAgentMessage {
+  nodeId: string;
+  content: string;
+  isStreaming: boolean;
 }
+
+// 커스텀 스트림 파트 타입
+export type CXDMStreamPart = LanguageModelV1StreamPart | {
+  type: 'partner-agent-message';
+  partnerAgent: PartnerAgentMessage;
+};
 
 // CXDM 모델 클래스
 export class CXDMLanguageModel implements LanguageModelV1 {
@@ -41,139 +54,7 @@ export class CXDMLanguageModel implements LanguageModelV1 {
     rawCall: { rawPrompt: unknown; rawSettings: Record<string, any> };
     warnings?: LanguageModelV1CallWarning[];
   }> {
-    console.log('[CXDM Provider] doGenerate called!');
-    const { prompt: messages, abortSignal } = options;
-
-    // chat_id 생성
-    let chatId = generateUUID();
-
-    // 시스템 메시지에서 INTERNAL_CHAT_ID 찾기 (있을 경우)
-    const systemMessage = messages.find(
-      (msg: any) =>
-        msg.role === 'system' &&
-        typeof msg.content === 'string' &&
-        msg.content.includes('[INTERNAL_CHAT_ID:'),
-    );
-
-    if (systemMessage && typeof systemMessage.content === 'string') {
-      const match = systemMessage.content.match(
-        /\[INTERNAL_CHAT_ID:([^\]]+)\]/,
-      );
-      if (match) {
-        chatId = match[1];
-      }
-    }
-
-    // INTERNAL_CHAT_ID 메시지 제거
-    const filteredMessages = messages.filter(
-      (msg: any) =>
-        !(
-          msg.role === 'system' &&
-          typeof msg.content === 'string' &&
-          msg.content.includes('[INTERNAL_CHAT_ID:')
-        ),
-    );
-
-    // 마지막 사용자 메시지만 추출
-    const lastUserMessage = filteredMessages
-      .slice()
-      .reverse()
-      .find((msg: any) => msg.role === 'user');
-
-    if (!lastUserMessage) {
-      throw new Error('No user message found');
-    }
-
-    // 텍스트 내용만 추출
-    let messageText = '';
-    if (typeof lastUserMessage.content === 'string') {
-      messageText = lastUserMessage.content;
-    } else if (Array.isArray(lastUserMessage.content)) {
-      messageText = lastUserMessage.content
-        .filter((part) => part.type === 'text')
-        .map((part) => part.text)
-        .join(' ');
-    }
-
-    // CXDM API 요청
-    const requestBody = {
-      message: messageText,
-      chat_id: chatId,
-    };
-
-    logDebug('doGenerate Request Body', requestBody);
-
-    const response = await fetch(CUSTOM_API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-      signal: abortSignal,
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`CXDM API error: ${response.statusText} - ${errorBody}`);
-    }
-
-    // SSE 스트림을 텍스트로 수집
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('No response body');
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullText = '';
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const cleanLine = line.replace(/\r$/, '');
-          
-          if (cleanLine.trim() === '') continue;
-          if (cleanLine.startsWith(': ping')) continue;
-
-          if (cleanLine.startsWith('data: ')) {
-            const data = cleanLine.slice(6).replace(/\r$/, '');
-
-            if (data === '[DONE]' || data.trim() === '[DONE]') {
-              break;
-            }
-
-            try {
-              const parsed = JSON.parse(data);
-              
-              if (parsed.choices?.[0]?.delta?.content) {
-                fullText += parsed.choices[0].delta.content;
-              }
-            } catch (e) {
-              // 파싱 에러 무시
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-
-    return {
-      text: fullText,
-      usage: { promptTokens: 0, completionTokens: 0 },
-      finishReason: 'stop',
-      rawCall: {
-        rawPrompt: requestBody,
-        rawSettings: {},
-      },
-    };
+    throw new Error('doGenerate not implemented for CXDM');
   }
 
   async doStream(options: LanguageModelV1CallOptions): Promise<{
@@ -182,7 +63,6 @@ export class CXDMLanguageModel implements LanguageModelV1 {
     rawCall: { rawPrompt: unknown; rawSettings: Record<string, any> };
     warnings?: LanguageModelV1CallWarning[];
   }> {
-    console.log('[CXDM Provider] doStream called!');
     const { prompt: messages, abortSignal } = options;
 
     // chat_id 추출 - INTERNAL_CHAT_ID 마커에서 추출
@@ -216,14 +96,6 @@ export class CXDMLanguageModel implements LanguageModelV1 {
         ),
     );
 
-    logDebug('Stream Request Options', {
-      messageCount: messages.length,
-      lastMessage: messages[messages.length - 1],
-      chatId,
-      filteredMessagesCount: filteredMessages.length,
-      allMessages: messages,
-    });
-
     // 마지막 사용자 메시지만 추출 (필터링된 메시지에서)
     const lastUserMessage = filteredMessages
       .slice()
@@ -245,19 +117,34 @@ export class CXDMLanguageModel implements LanguageModelV1 {
         .join(' ');
     }
 
-    // CXDM API 요청 body
+    // JSON-RPC 요청 body
     const requestBody = {
-      message: messageText,
-      chat_id: chatId,
+      id: generateUUID(),
+      jsonrpc: '2.0',
+      method: 'message/stream',
+      params: {
+        message: {
+          messageId: generateUUID(),
+          role: 'user',
+          parts: [
+            {
+              kind: 'text',
+              text: messageText,
+            },
+          ],
+        },
+        chat_id: chatId,
+      },
     };
 
     logDebug('Request Body', requestBody);
 
     // 직접 fetch 호출
-    const response = await fetch(CUSTOM_API_ENDPOINT, {
+    const response = await fetch(CXDM_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
       },
       body: JSON.stringify(requestBody),
       signal: abortSignal,
@@ -276,8 +163,7 @@ export class CXDMLanguageModel implements LanguageModelV1 {
     }
 
     // SSE 스트림 처리를 위한 TransformStream
-    const { readable, writable } =
-      new TransformStream<LanguageModelV1StreamPart>();
+    const { readable, writable } = new TransformStream<LanguageModelV1StreamPart>();
     const writer = writable.getWriter();
 
     // 응답 스트림 처리
@@ -291,6 +177,25 @@ export class CXDMLanguageModel implements LanguageModelV1 {
       const decoder = new TextDecoder();
       let buffer = '';
       let fullText = '';
+      
+      // 토큰 스트림 타이밍 제어를 위한 변수
+      let lastWriteTime = Date.now();
+      const MIN_WRITE_INTERVAL = 16; // 60fps에 맞춰 16ms
+      
+      // 로그 파일 설정
+      const logDir = path.join(process.cwd(), 'logs');
+      const logFile = path.join(logDir, `cxdm-stream-${new Date().toISOString().replace(/[:.]/g, '-')}.log`);
+      
+      // 로그 디렉토리 생성
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+      
+      // 로그 파일에 헤더 작성
+      fs.writeFileSync(logFile, `CXDM Stream Log - ${new Date().toISOString()}\n`);
+      fs.appendFileSync(logFile, `Chat ID: ${chatId}\n`);
+      fs.appendFileSync(logFile, `Request: ${JSON.stringify(requestBody, null, 2)}\n`);
+      fs.appendFileSync(logFile, `${'='.repeat(80)}\n\n`);
 
       try {
         while (true) {
@@ -298,12 +203,13 @@ export class CXDMLanguageModel implements LanguageModelV1 {
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
+          const lines = buffer.split(/\r\n\r\n|\n\n/);
           buffer = lines.pop() || '';
 
           for (const line of lines) {
-            // 캐리지 리턴 제거
-            const cleanLine = line.replace(/\r$/, '');
+            // 캐리지 리턴 제거 (백슬래시 처리는 하지 않음)
+            // console.log('line: ', line);
+            const cleanLine = line; // 원본 그대로 사용
             
             if (cleanLine.trim() === '') continue;
 
@@ -316,10 +222,15 @@ export class CXDMLanguageModel implements LanguageModelV1 {
             }
 
             if (cleanLine.startsWith('data: ')) {
-              const data = cleanLine.slice(6).replace(/\r$/, '');
+              const data = cleanLine.slice(6);
+              
+              // 모든 SSE 데이터를 로그 파일에 기록
+              fs.appendFileSync(logFile, `[${new Date().toISOString()}] SSE Data: ${data}\n`);
 
               if (data === '[DONE]' || data.trim() === '[DONE]') {
                 logDebug('Stream Complete', { fullText });
+                fs.appendFileSync(logFile, '\n=== STREAM COMPLETE ===\n');
+                
                 await writer.write({
                   type: 'finish',
                   finishReason: 'stop',
@@ -328,94 +239,123 @@ export class CXDMLanguageModel implements LanguageModelV1 {
                     completionTokens: 0,
                   },
                 });
-                return; // break 대신 return으로 변경
+                
+                // console.log(`[CXDM] Stream log saved to: ${logFile}`);
+                return;
               }
 
               try {
-                // OpenAI 형식으로 파싱 시도
                 const parsed = JSON.parse(data);
+                // Partner Agent 메시지인 경우 상세 로깅
+                if (parsed.jsonrpc === '2.0' && parsed.result?.kind === 'artifact-update') {
+                  const metadata = parsed.result.artifact?.metadata || {};
+                  if (metadata.langgraph_node && metadata.langgraph_node !== 'agent' && metadata.langgraph_node !== 'final') {
+                    // console.log(`[CXDM] Partner Agent Message from ${metadata.langgraph_node}:`, parsed.result.artifact);
+                    
+                    // Partner Agent 메시지 상세 로깅
+                    fs.appendFileSync(logFile, `\n--- PARTNER AGENT MESSAGE (${metadata.langgraph_node}) ---\n`);
+                    fs.appendFileSync(logFile, `${JSON.stringify(parsed.result.artifact, null, 2)}\n`);
+                    fs.appendFileSync(logFile, '--- END PARTNER AGENT MESSAGE ---\n\n');
+                  }
+                }
                 logDebug('Parsed SSE Data', parsed);
 
-                // CXDM API 응답 처리
-                if (parsed.choices?.[0]?.delta) {
-                  const delta = parsed.choices[0].delta;
+                // JSON-RPC 응답 처리
+                if (parsed.jsonrpc === '2.0' && parsed.result) {
+                  const result = parsed.result;
                   
-                  // 1. Tool Call 처리
-                  if (delta.tool_call) {
-                    logDebug('Tool Call Detected', delta.tool_call);
-                    
-                    // Tool call 시작 또는 진행중
-                    if (delta.tool_call.name && delta.tool_call.arguments) {
-                      // send_task를 위한 타이틀 생성
-                      let toolTitle = '';
-                      if (delta.tool_call.name === 'send_task') {
-                        const agentName = delta.tool_call.arguments.agent_name || '';
-                        const task = delta.tool_call.arguments.task || '';
-                        toolTitle = `${agentName.replace(/_/g, ' ')}에게 요청: ${task}`;
-                      } else {
-                        toolTitle = `${delta.tool_call.name} 실행`;
+                  // artifact-update 형식 처리
+                  if (result.kind === 'artifact-update' && result.artifact) {
+                    const artifact = result.artifact;
+                    const metadata = artifact.metadata || {};
+                    const langgraphNode = metadata.langgraph_node;
+
+                    // 전체 스트림 완료 체크
+                    if (artifact.name === 'conversion_result') {
+                      logDebug('Conversion Result - Stream Complete', artifact);
+                      continue;
+                    }
+
+                    // 메시지 내용 추출
+                    let messageContent = '';
+                    if (artifact.parts && Array.isArray(artifact.parts)) {
+                      for (const part of artifact.parts) {
+                        if (part.kind === 'text' && part.text) {
+                          messageContent += part.text;
+                        }
                       }
-                      
-                      // Tool call 표시를 위한 특별한 마커를 텍스트로 전송
+                    }
+
+                    // 빈 메시지는 무시
+                    if (!messageContent || messageContent.trim() === '') {
+                      continue;
+                    }
+                    
+                    // console.log('[CXDM] Processing message:', messageContent);
+                    
+                    // 타이밍 제어
+                    const now = Date.now();
+                    const timeSinceLastWrite = now - lastWriteTime;
+                    
+                    if (timeSinceLastWrite < MIN_WRITE_INTERVAL) {
+                      await new Promise(resolve => setTimeout(resolve, MIN_WRITE_INTERVAL - timeSinceLastWrite));
+                    }
+                    
+                    // 상태 메시지 패턴 확인
+                    const statusPatterns = [
+                      { pattern: /🔍.*중\.\./, state: 'call' },
+                      { pattern: /✅.*완료!/, state: 'result' },
+                      { pattern: /⏳.*대기/, state: 'call' },
+                      { pattern: /🔄.*진행/, state: 'call' },
+                      { pattern: /📊.*분석/, state: 'call' },
+                      { pattern: /💡.*생성/, state: 'call' }
+                    ];
+                    
+                    let isStatusMessage = false;
+                    let toolState = '';
+                    
+                    for (const { pattern, state } of statusPatterns) {
+                      if (pattern.test(messageContent)) {
+                        isStatusMessage = true;
+                        toolState = state;
+                        break;
+                      }
+                    }
+                    
+                    // 모든 메시지를 그대로 전송 (마커 포함)
+                    if (isStatusMessage) {
+                      const statusMarker = `<!--STATUS:${toolState}:${messageContent}-->`;
                       await writer.write({
                         type: 'text-delta',
-                        textDelta: `[TOOL_CALL_START]${toolTitle}[TOOL_CALL_END]\n\n`,
+                        textDelta: statusMarker,
+                      });
+                    } else {
+                      fullText += messageContent;
+                      await writer.write({
+                        type: 'text-delta',
+                        textDelta: messageContent,
                       });
                     }
                     
-                    // Tool call 결과 - 실제 결과는 이후 content로 스트리밍됨
-                    if (delta.tool_call.result) {
-                      const resultText = Array.isArray(delta.tool_call.result.result) 
-                        ? delta.tool_call.result.result.join('\n')
-                        : JSON.stringify(delta.tool_call.result);
-                      
-                      logDebug('Tool Result Preview', `${resultText.substring(0, 200)}...`);
-                      // 결과는 이후 delta.content로 스트리밍되므로 여기서는 처리하지 않음
-                    }
-                    
+                    lastWriteTime = Date.now();
                   }
                   
-                  // 2. 일반 텍스트 콘텐츠 처리 (tool_call이 있어도 content가 있을 수 있음)
-                  if (delta.content) {
-                    const content = delta.content;
-                    fullText += content;
-
+                  // 스트림 완료 처리
+                  else if (result.kind === 'status-update' && result.status?.state === 'completed') {
+                    logDebug('Stream completed via status-update', result);
                     await writer.write({
-                      type: 'text-delta',
-                      textDelta: content,
+                      type: 'finish',
+                      finishReason: 'stop',
+                      usage: {
+                        promptTokens: 0,
+                        completionTokens: 0,
+                      },
                     });
+                    return;
                   }
-                }
-                // 다른 형식일 경우를 위한 폴백
-                else if (typeof parsed === 'string') {
-                  fullText += parsed;
-                  await writer.write({
-                    type: 'text-delta',
-                    textDelta: parsed,
-                  });
-                } else if (parsed.content) {
-                  fullText += parsed.content;
-                  await writer.write({
-                    type: 'text-delta',
-                    textDelta: parsed.content,
-                  });
-                } else if (parsed.text) {
-                  fullText += parsed.text;
-                  await writer.write({
-                    type: 'text-delta',
-                    textDelta: parsed.text,
-                  });
                 }
               } catch (e) {
                 logDebug('SSE Parse Error', { data, error: e });
-                // 파싱 실패 시 원본 데이터를 텍스트로 처리
-                if (data && data !== '[DONE]' && !data.includes('[DONE]')) {
-                  fullText += data;
-                  await writer.write({
-                    type: 'text-delta',
-                    textDelta: data,
-                  });
-                }
               }
             }
           }
@@ -458,19 +398,22 @@ function generateUUID(): string {
   });
 }
 
-// 전역 chatId 저장소 (실제로는 더 나은 방식 필요)
+// 전역 chatId 저장소
 let globalChatId: string | null = null;
 
 export function setChatId(chatId: string) {
   globalChatId = chatId;
 }
 
+// 기본 CXDM 모델 ID (환경 변수에서 가져오기)
+const DEFAULT_CXDM_MODEL = process.env.DEFAULT_CHAT_MODEL || 'cxdm-1.1-concierge';
+
 // 모델 ID에 대한 프로바이더 인스턴스 반환
 export function getCXDMModel(modelId: string): LanguageModelV1 {
-  console.log('[CXDM Provider] getCXDMModel called with:', modelId);
   logDebug('Getting CXDM Model', { modelId });
 
-  if (modelId !== '__REPLACE__CUSTOM_AI_MODEL') {
+  // CXDM 프로바이더의 모델인지 확인 (환경 변수 값과 비교)
+  if (modelId !== DEFAULT_CXDM_MODEL) {
     throw new NoSuchModelError({ modelId, modelType: 'languageModel' });
   }
 
@@ -485,11 +428,8 @@ class CXDMLanguageModelWithChatId extends CXDMLanguageModel {
     rawCall: { rawPrompt: unknown; rawSettings: Record<string, any> };
     warnings?: LanguageModelV1CallWarning[];
   }> {
-    console.log('[CXDM Provider] CXDMLanguageModelWithChatId.doStream called!');
     // globalChatId 사용
     const chatId = globalChatId || generateUUID();
-
-    console.log('[CXDM Provider] globalChatId:', globalChatId);
     
     // 원래 doStream 호출하되, chatId를 주입
     const originalDoStream = super.doStream.bind(this);
@@ -506,50 +446,6 @@ class CXDMLanguageModelWithChatId extends CXDMLanguageModel {
       ],
     };
 
-    console.log('[CXDM Provider] Calling super.doStream with modified options');
     return originalDoStream(modifiedOptions);
   }
-}
-
-// 디버깅 헬퍼: SSE 응답 스트림을 로깅하면서 전달
-export function wrapStreamForLogging(stream: ReadableStream): ReadableStream {
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-
-  return new ReadableStream({
-    async start(controller) {
-      let buffer = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            if (buffer) {
-              logDebug('Final Buffer', buffer);
-            }
-            controller.close();
-            break;
-          }
-
-          // 원본 데이터 전달
-          controller.enqueue(value);
-
-          // 로깅을 위한 디코딩
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim()) {
-              logDebug('Stream Line', line);
-            }
-          }
-        }
-      } catch (error) {
-        logDebug('Stream Error', error);
-        controller.error(error);
-      }
-    },
-  });
 }
